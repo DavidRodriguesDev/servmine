@@ -1,0 +1,616 @@
+{% extends ../base.html %}
+
+{% block meta %}
+{% end %}
+
+{% block title %}Crafty Controller - {{ translate('customLogin', 'pageTitle', data['lang']) }}{% end %}
+
+{% block content %}
+
+<div class="content-wrapper">
+  <!-- Screen-reader announcements for async apply/delete/save (visual feedback
+       is the button checkmark; this gives AT users an equivalent cue). -->
+  <div id="a11y_status" class="sr-only" role="status" aria-live="polite"></div>
+  <!-- Page Title Header Starts-->
+  <div class="row page-title-header">
+    <div class="col-12">
+      <div class="page-header">
+        <h4 class="page-title">
+          {{ translate('panelConfig', 'title', data['lang']) }}
+          <br />
+        </h4>
+      </div>
+    </div>
+  </div>
+  <!-- Page Title Header Ends-->
+
+  <div class="row">
+    <div class="col-md-12 grid-margin">
+      <div class="card">
+        <div class="card-body">
+
+
+          {% if data['superuser'] %}
+          <span class="d-none d-sm-block">
+            {% include "parts/crafty_config_list.html %}
+          </span>
+          <span class="d-block d-sm-none">
+            {% include "parts/m_crafty_config_list.html %}
+          </span>
+          {% end %}
+
+          <!-- Page Title Header Starts-->
+          <div class="row page-title-header">
+            <div class="col-12">
+              <div class="page-header">
+                <!-- TODO: Translate the following -->
+                <h4 class="page-title">{{ translate('customLogin', 'customLoginPage', data['lang']) }}</h4>
+              </div>
+            </div>
+
+          </div>
+          <!-- Page Title Header Ends-->
+
+          <div class="row">
+            <div class="col-md-12 col-lg-12 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-12 customize-col">
+                      <h4>{{ translate('customLogin', 'loginImage', data['lang']) }}</h4>
+                      <hr class="section-divider">
+                      {% set picker = {
+                        'id': 'background',
+                        'label': translate('customLogin', 'loginBackground', data['lang']),
+                        'options': data['backgrounds'],
+                        'selected': data['backgrounds'][0],
+                        'default_label': 'login_1.jpg',
+                        'default_value': 'login_1.jpg',
+                        'recommended': '1920x1080',
+                        'thumb_src': '/static/assets/images/auth/' + data['background'],
+                        'upload_type': 'background',
+                        'endpoint': '/api/v2/crafty/config/customize',
+                        'delete_endpoint': '/api/v2/crafty/config/customize',
+                        'payload_key': 'photo',
+                        'image_base': '/static/assets/images/auth/custom',
+                        'stock_src': '/static/assets/images/auth/login_1.jpg',
+                        'preview_extra': '#bg-preview',
+                      } %}
+                      {% include "parts/image_picker.html" %}
+
+                      <div class="form-group row mt-3">
+                        <label class="col-sm-3" for="modal_opacity">{{ translate('customLogin', 'loginOpacity', data['lang']) }}</label>
+                        <label class="col-sm-2 text-nowrap" id="opacityValue">{{ data['login_opacity'] }}%</label>
+                        <div class="range col-sm-7">
+                          <input type="range" class="form-control-range" id="modal_opacity" name="modal_opacity" min="0" max="100" value="{{ data['login_opacity'] }}">
+                        </div>
+                      </div>
+                      <h4>{{ translate('customLogin', 'logosTitle', data['lang']) }}</h4>
+                      <hr class="section-divider">
+                      <div class="form-group mt-3">
+                        {% set picker = {
+                          'id': 'logo_full',
+                          'label': translate('customLogin', 'logoFull', data['lang']),
+                          'options': data['logo_full_images'],
+                          'selected': data['brand_settings']['full'],
+                          'default_label': translate('customLogin', 'logoDefault', data['lang']),
+                          'default_value': '',
+                          'recommended': '512x128',
+                          'thumb_src': data['brand']['full'],
+                          'upload_type': 'logo_full',
+                          'endpoint': '/api/v2/crafty/config/logos',
+                          'delete_endpoint': '/api/v2/crafty/config/logos',
+                          'payload_key': 'logo_full',
+                          'image_base': '/static/assets/images/logos/full',
+                          'stock_src': '/static/assets/images/logo_long.svg',
+                          'preview_extra': '#login_preview_logo',
+                        } %}
+                        {% include "parts/image_picker.html" %}
+                      </div>
+                      <div class="form-group mt-3">
+                        {% set picker = {
+                          'id': 'logo_square',
+                          'label': translate('customLogin', 'logoSquare', data['lang']),
+                          'options': data['logo_square_images'],
+                          'selected': data['brand_settings']['square'],
+                          'default_label': translate('customLogin', 'logoDefault', data['lang']),
+                          'default_value': '',
+                          'recommended': '256x256',
+                          'thumb_src': data['brand']['square'],
+                          'upload_type': 'logo_square',
+                          'endpoint': '/api/v2/crafty/config/logos',
+                          'delete_endpoint': '/api/v2/crafty/config/logos',
+                          'payload_key': 'logo_square',
+                          'image_base': '/static/assets/images/logos/square',
+                          'stock_src': '/static/assets/images/crafty-logo-square.svg',
+                        } %}
+                        {% include "parts/image_picker.html" %}
+                      </div>
+                    </div>
+                    <div class="col-12 customize-col">
+                      <h6>{{ translate('customLogin', 'preview', data['lang']) }}:</h6>
+                          <div id="login_preview" class="position-relative">
+                            <img id="bg-preview" src="../../static/assets/images/auth/{{ data['background'] }}" class="img-fluid" alt="{{ translate('customLogin', 'loginBackground', data['lang']) }} preview">
+                            <div id="login-form-preview">
+                              <div id="login-form-background" class="auto-form-wrapper login-modal">
+                                <div class="text-center auto-form-logo">
+                                  <img id="login_preview_logo" src="{{ data['brand']['full'] }}" alt="{{ translate('customLogin', 'logoFull', data['lang']) }} preview">
+                                </div>
+                                <style>
+                                  #login-form-preview {
+                                    display: flex;
+                                    position: absolute;
+                                    overflow: hidden;
+                                    top: 50%;
+                                    left: 50%;
+                                    /* Scale the whole modal down as a unit so its size
+                                       relative to the background matches the real login
+                                       page (a compact card, not a near-full-width panel). */
+                                    transform: translate(-50%, -50%) scale(0.62);
+                                    transform-origin: center center;
+                                    max-width: 90%;
+                                    max-height: 90%;
+                                  }
+
+                                  .auto-form-wrapper {
+                                    background: rgb(34, 36, 55, 1);
+                                    padding: 2rem 2rem 0.5rem;
+                                    border-radius: 4px;
+                                    -webkit-box-shadow: 0 -25px 37.7px 11.3px rgb(8 143 220 / 7%);
+                                    box-shadow: 0 -25px 37.7px 11.3px rgb(8 143 220 / 7%);
+                                    color: #fff;
+                                  }
+
+                                  /*.auto-form-logo {
+                                    background: #222437;
+                                    padding: 0rem;
+                                    margin: 0.5rem 0rem;
+                                    border-radius: 0.2rem;
+                                    color: #fff;
+                                  }*/
+
+                                  .login-modal {
+                                    border-radius: 0.4rem !important;
+                                    box-shadow: 0 8px 12px 0 hsla(0, 0%, 0%, 0.2) !important;
+                                  }
+
+                                  .login-text-input {
+                                    border: none !important;
+                                    background-color: hsl(234, 30%, 45%);
+                                    color: var(--white) !important;
+                                  }
+
+                                  .login-text-input:hover,
+                                  .login-text-input:focus {
+                                    background-color: hsl(234, 30%, 39%) !important;
+                                  }
+
+                                  .login-input {
+                                    border-radius: 0.4rem !important;
+                                    box-shadow: 0 8px 12px 0 hsla(0, 0%, 0%, 0.2);
+                                    transition: all 0.3s ease-in-out;
+                                  }
+
+                                  .login-input:hover,
+                                  .login-input:focus {
+                                    box-shadow: 0 12px 16px 0 hsla(0, 0%, 0%, 0.4);
+                                  }
+                                </style>
+
+                                <div id="login_form_data">
+                                  <input type="hidden" name="_xsrf" value="2|1d603267|809fb6bd82f677d440e484dde7c3a310|1671726040" disabled>
+                                  <div class="form-group">
+                                    <label class="label">Username</label>
+                                    <div class="input-group">
+                                      <input type="text" class="form-control login-text-input login-input" placeholder="Username" name="username" id="username" required="true" disabled>
+                                    </div>
+                                  </div>
+                                  <div class="form-group">
+                                    <label class="label">Password</label>
+                                    <div class="input-group">
+                                      <input type="password" class="form-control login-text-input login-input" placeholder="Password" name="password" id="password" required="true" disabled>
+                                    </div>
+                                  </div>
+                                  <div class="form-group">
+                                    <button class="login-input btn btn-primary submit-btn btn-block" disabled>Log
+                                      In</button>
+                                  </div>
+
+                                  <div class="form-group d-flex justify-content-between">
+                                    <div class="form-check form-check-flat mt-0">
+                                      &nbsp;
+                                    </div>
+                                    <a href="#" class="text-small forgot-password">Forgot Password</a>
+                                  </div>
+                                  <div class="text-block text-center my-3">
+                                    <span class="text-small font-weight-semibold"><a href="#">Crafty Control {{ data['version_data'] }}</a> </span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12 col-lg-12 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <h4>{{ translate('customLogin', 'embedTitle', data['lang']) }}</h4>
+                  <hr class="section-divider">
+                  <p>{{ translate('customLogin', 'embedHelp', data['lang']) }}</p>
+                  <form id="embed_form">
+                    <div class="form-group row">
+                      <label class="col-sm-3 col-form-label" for="og_enabled">{{ translate('customLogin', 'embedEnabled', data['lang']) }}</label>
+                      <div class="col-sm-9">
+                        <input type="checkbox" id="og_enabled" name="og_enabled" {% if data['embed_settings']['enabled'] %}checked{% end %}>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-sm-3 col-form-label" for="og_title">{{ translate('customLogin', 'embedTitleField', data['lang']) }}</label>
+                      <div class="col-sm-9">
+                        <input type="text" class="form-control" id="og_title" name="og_title" maxlength="255" value="{{ data['embed_settings']['title'] }}" placeholder="Crafty Controller">
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-sm-3 col-form-label" for="og_description">{{ translate('customLogin', 'embedDescriptionField', data['lang']) }}</label>
+                      <div class="col-sm-9">
+                        <input type="text" class="form-control" id="og_description" name="og_description" maxlength="255" value="{{ data['embed_settings']['description'] }}">
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-sm-3 col-form-label" for="og_color">{{ translate('customLogin', 'embedColorField', data['lang']) }}</label>
+                      <div class="col-sm-9">
+                        <input type="color" class="form-control" id="og_color" name="og_color" value="{{ data['embed_settings']['color'] }}">
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <button class="btn btn-outline-success save-embed" type="button">{{ translate('customLogin', 'apply', data['lang']) }}</button>
+                      <small id="embed_unsaved" class="text-warning d-none ml-2"><i class="ph ph-warning-circle"></i> {{ translate('customLogin', 'unsavedChanges', data['lang']) }}</small>
+                    </div>
+                    {% set picker = {
+                      'id': 'embed',
+                      'label': translate('customLogin', 'embedImageSelect', data['lang']),
+                      'options': data['embed_images'],
+                      'selected': data['embed_settings']['image'],
+                      'default_label': translate('customLogin', 'embedImageDefault', data['lang']),
+                      'default_value': '',
+                      'recommended': '1200x630',
+                      'thumb_src': ('/static/assets/images/embed/' + data['embed_settings']['image']) if data['embed_settings']['image'] else '/static/assets/images/Crafty_4-0.png',
+                      'upload_type': 'embed',
+                      'endpoint': '/api/v2/crafty/config/embed',
+                      'delete_endpoint': '/api/v2/crafty/config/embed',
+                      'payload_key': 'og_image',
+                      'image_base': '/static/assets/images/embed',
+                      'stock_src': '/static/assets/images/Crafty_4-0.png',
+                    } %}
+                    {% include "parts/image_picker.html" %}
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+</div>
+
+<style>
+  .img-fluid {
+    margin-bottom: 1rem;
+  }
+</style>
+<!-- content-wrapper ends -->
+
+{% end %}
+
+{% block js %}
+<script>
+  $(document).ready(function () {
+    $('[data-toggle="popover"]').popover();
+    if ($(window).width() < 1000) {
+      $('.too_small').popover("show");
+      $('.too_small2').popover("show");
+    }
+
+  });
+  $(window).ready(function () {
+    $('body').click(function () {
+      $('.too_small').popover("hide");
+      $('.too_small2').popover("hide");
+    });
+  });
+  $(window).resize(function () {
+    // This will execute whenever the window is resized
+    if ($(window).width() < 1000) {
+      $('.too_small').popover("show");
+    }
+    else {
+      $('.too_small').popover("hide");
+    } // New width
+    if ($(window).width() < 1000) {
+      $('.too_small2').popover("show");
+    }
+    else {
+      $('.too_small2').popover("hide");
+    } // New width
+  });
+</script>
+<script>
+
+  $(document).ready(function () {
+    console.log('ready for JS!')
+
+  });
+
+  $(".show_button").click(function () {
+    console.log("showing key");
+    api_key = $(this).attr("data-id");
+    bootbox.alert({
+      backdrop: true,
+      title: '',
+      message: api_key,
+    });
+  });
+
+  // Shown when Delete is clicked while the default (stock) image is selected.
+  const NOTHING_TO_DELETE = "{{ translate('customLogin', 'nothingToDelete', data['lang']) }}";
+  const CHANGE_APPLIED = "{{ translate('customLogin', 'changeApplied', data['lang']) }}";
+  const IMAGE_DELETED = "{{ translate('customLogin', 'imageDeleted', data['lang']) }}";
+
+  // Announce a transient status to assistive tech via the polite live region.
+  // Clear first so the same message announced twice in a row still fires.
+  function announce(message) {
+    const region = $('#a11y_status');
+    region.text('');
+    setTimeout(function () { region.text(message); }, 50);
+  }
+
+  // Shared button feedback: spinner while busy, checkmark on success, restore on failure.
+  function buttonSpinner(button) {
+    const label = button.html();
+    button.prop('disabled', true).html('<i class="ph ph-spinner-gap ph-spin"></i> ' + label);
+    return label;
+  }
+  function buttonSuccess(button, label) {
+    button.html('<i class="ph ph-check"></i> ' + label);
+    setTimeout(function () {
+      button.find('i').fadeOut(600, function () {
+        button.prop('disabled', false).html(label);
+      });
+    }, 2000);
+  }
+  function buttonRestore(button, label) {
+    button.prop('disabled', false).html(label);
+  }
+
+  // Generic image delete: DELETE to endpoint with payload, run onSuccess on ok, button feedback throughout.
+  async function deleteImage(button, endpoint, payload, onSuccess) {
+    const label = buttonSpinner(button);
+    const token = getCookie("_xsrf");
+    const res = await fetch(endpoint, {
+      method: 'DELETE',
+      headers: { 'X-XSRFToken': token },
+      body: JSON.stringify(payload),
+    });
+    const responseData = await res.json();
+    if (responseData.status === "ok") {
+      onSuccess();
+      buttonSuccess(button, label);
+      announce(IMAGE_DELETED);
+    } else {
+      buttonRestore(button, label);
+      bootbox.alert({ title: responseData.error, message: responseData.error_data });
+    }
+  }
+
+  // Show/hide a section's "not applied yet" hint by its hint element id
+  function setDirty(hintId, dirty) {
+    $('#' + hintId).toggleClass('d-none', !dirty);
+  }
+
+  // Make an element accept an image file dropped onto it, routing it to onFile.
+  function enableDropZone(zoneSelector, onFile) {
+    const zone = $(zoneSelector);
+    zone.on('dragenter dragover', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      zone.addClass('drag-over');
+    });
+    zone.on('dragleave dragend', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      zone.removeClass('drag-over');
+    });
+    zone.on('drop', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      zone.removeClass('drag-over');
+      const file = e.originalEvent.dataTransfer.files[0];
+      if (file) { onFile(file); }
+    });
+  }
+
+  // Don't let a file dropped outside a drop zone navigate the page away.
+  $(document).on('dragover drop', function (e) { e.preventDefault(); });
+
+  // ----- Generic image pickers (instant apply) -----
+  // Per-type extras merged into the apply payload. Background must resend the
+  // current opacity because /config/customize takes photo + opacity together.
+  const EXTRA_PAYLOAD = {
+    background: function () { return { opacity: $('#modal_opacity').val() }; },
+  };
+
+  $('.image-picker').each(function () {
+    const root = $(this);
+    const id = root.data('id');
+    const uploadType = root.data('upload-type');
+    const endpoint = root.data('endpoint');
+    const deleteEndpoint = root.data('delete-endpoint');
+    const payloadKey = root.data('payload-key');
+    const imageBase = root.data('image-base');
+    const stockSrc = root.data('stock-src');
+    const defaultValue = String(root.data('default-value'));
+    const previewExtra = (root.data('preview-extra') || '').toString();
+
+    const $select = $('#' + id + '_select');
+    const $file = $('#' + id + '_file');
+    const $upload = root.find('.upload-image-picker');
+
+    // <img> targets this picker updates: thumbnail + any extra preview.
+    const targets = previewExtra
+      ? ['#' + id + '_thumb', previewExtra]
+      : ['#' + id + '_thumb'];
+    function setPreview(src) {
+      targets.forEach(function (sel) { $(sel).attr('src', src); });
+    }
+    // Preview src for a dropdown value (stock when it's the default).
+    function srcFor(value) {
+      return value && value !== defaultValue ? imageBase + '/' + value : stockSrc;
+    }
+    function extraPayload() {
+      return EXTRA_PAYLOAD[uploadType] ? EXTRA_PAYLOAD[uploadType]() : {};
+    }
+
+    // PATCH the chosen filename (plus any per-type extras) to persist it.
+    async function applyImage(button, name) {
+      const label = buttonSpinner(button);
+      const payload = Object.assign({}, extraPayload());
+      payload[payloadKey] = name;
+      const token = getCookie("_xsrf");
+      const res = await fetch(endpoint, {
+        method: 'PATCH',
+        headers: { 'X-XSRFToken': token },
+        body: JSON.stringify(payload),
+      });
+      const responseData = await res.json();
+      if (responseData.status === "ok") {
+        buttonSuccess(button, label);
+        announce(CHANGE_APPLIED);
+      } else {
+        buttonRestore(button, label);
+        bootbox.alert({ title: responseData.error, message: responseData.error_data });
+      }
+    }
+
+    // Upload button opens the hidden file dialog.
+    $upload.click(function () { $file.click(); });
+
+    // Pick or drop a file: preview, upload, then apply instantly.
+    async function handleFile(file) {
+      if (!file) { return; }
+      const reader = new FileReader();
+      reader.onload = function (e) { setPreview(e.target.result); };
+      reader.readAsDataURL(file);
+      const ok = await uploadFile(uploadType, file, null, 0, null, null, id + '_progress');
+      if (!ok) { return; }  // uploadFile alerts on failure
+      if (!$select.find('option[value="' + file.name + '"]').length) {
+        $select.append(new Option(file.name, file.name));
+      }
+      $select.val(file.name);
+      await applyImage($upload, file.name);
+    }
+    $file.change(function () { handleFile(this.files[0]); });
+    enableDropZone('#' + id + '_thumb', handleFile);
+
+    // Choosing an existing image previews + applies instantly.
+    $select.change(function () {
+      const value = $select.val();
+      setPreview(srcFor(value));
+      applyImage($upload, value);
+    });
+
+    // Delete the selected uploaded image (guard against the stock default).
+    root.find('.delete-image-picker').click(function () {
+      const button = $(this);
+      const name = $select.val();
+      if (!name || name === defaultValue) {
+        bootbox.alert(NOTHING_TO_DELETE);
+        return;
+      }
+      const payload = {};
+      payload[payloadKey] = name;
+      deleteImage(button, deleteEndpoint, payload, function () {
+        $select.find('option[value="' + name + '"]').remove();
+        $select.val(defaultValue);
+        setPreview(stockSrc);
+      });
+    });
+  });
+
+  // ----- Login background opacity (debounced instant apply) -----
+  // Live-preview while dragging, but debounce the save so moving the slider
+  // doesn't fire a request for every intermediate value.
+  let opacitySaveTimer = null;
+
+  async function saveOpacity() {
+    const token = getCookie("_xsrf");
+    const res = await fetch(`/api/v2/crafty/config/customize`, {
+      method: 'PATCH',
+      headers: { 'X-XSRFToken': token },
+      body: JSON.stringify({ photo: $('#background_select').val(), opacity: $('#modal_opacity').val() }),
+    });
+    const responseData = await res.json();
+    if (responseData.status !== "ok") {
+      bootbox.alert({ title: responseData.error, message: responseData.error_data });
+    }
+  }
+
+  $('#modal_opacity').on('input', function () {
+    previewOpacity();
+    clearTimeout(opacitySaveTimer);
+    opacitySaveTimer = setTimeout(saveOpacity, 500);
+  });
+
+  // ----- Embed metadata (image is handled by the picker above) -----
+  // Only the og-* fields dirty the form; the picker's select is excluded.
+  $('#embed_form').on('change input', '#og_enabled, #og_title, #og_description, #og_color', function () {
+    setDirty('embed_unsaved', true);
+  });
+
+  $('.save-embed').click(async function () {
+    const button = $(this);
+    const label = buttonSpinner(button);
+    const payload = {
+      og_enabled: $('#og_enabled').is(':checked'),
+      og_title: $('#og_title').val(),
+      og_description: $('#og_description').val(),
+      og_color: $('#og_color').val(),
+    };
+    const token = getCookie("_xsrf");
+    const res = await fetch(`/api/v2/crafty/config/embed`, {
+      method: 'PATCH',
+      headers: { 'X-XSRFToken': token },
+      body: JSON.stringify(payload),
+    });
+    const responseData = await res.json();
+    if (responseData.status === "ok") {
+      setDirty('embed_unsaved', false);
+      buttonSuccess(button, label);
+      announce(CHANGE_APPLIED);
+    } else {
+      buttonRestore(button, label);
+      bootbox.alert({ title: responseData.error, message: responseData.error_data });
+    }
+  });
+
+  $(document).ready(function () {
+    let opacity = parseInt($("#modal_opacity").val());
+    document.getElementById('login-form-background').style.background = 'rgb(34, 36, 55, ' + (opacity / 100) + ')';
+  });
+
+  function previewOpacity() {
+    let opacity = parseInt($("#modal_opacity").val());
+    document.getElementById('opacityValue').innerHTML = (opacity) + "%";
+    document.getElementById('login-form-background').style.background = 'rgb(34, 36, 55, ' + (opacity / 100) + ')';
+  }
+</script>
+<script src="../../static/assets/js/shared/upload.js"></script>
+{% end %}
